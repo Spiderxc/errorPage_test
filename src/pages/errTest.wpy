@@ -1,0 +1,56 @@
+<template>
+  <view class="container">
+    <view class="default">
+      <!--<image src="../images/default-FCB.png" class="default-img"></image>-->
+      <slot name="imgs"></slot>
+      <slot name="txts"></slot>
+      <!--<text>it's just one test component</text>-->
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class extends wepy.component {
+    config = {
+      navigationBarTitleText: '默认页'
+    };
+
+    constructor() {
+      super();
+    };
+
+    components = {};
+
+    data = {};
+
+    computed = {};
+
+    methods = {};
+
+    events = {};
+
+    onLoad() {
+      console.log('onLoad-->errTest',this);
+    }
+  }
+</script>
+
+<style lang="less" scoped>
+  .default {
+    border: 1px solid #000;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    font-size: ~"26rpx";
+    color: #cccccc;
+    image {
+      width: ~"300rpx";
+      height: ~"300rpx";
+      margin-bottom: ~"30rpx";
+    }
+  }
+</style>

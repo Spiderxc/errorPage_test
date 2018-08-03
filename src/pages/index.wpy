@@ -1,0 +1,149 @@
+<template>
+  <view class="loading" hidden="{{isShow}}">loading...</view>
+  <test wx:if="{{is_arr && testList.length===0}}">
+    <view slot="imgs">
+      <image src="../images/default-FCB.png"></image>
+    </view>
+    <view slot="txts">
+      <text wx:if="{{!showNetErrorMsg}}">it's just one test component</text>
+      <text wx:else>网络故障，再次下拉刷新...</text>
+    </view>
+  </test>
+  <view class="container error" wx:else>
+    <view class="error_text">Test scroll-view && pullDownRefresh</view>
+    <scroll-view scroll-y class="scroll">
+      <repeat for="{{testList}}" key="index" item="item" @pullDownRefresh="refresh">
+        <view class="error_box box-shadow">{{item}}</view>
+      </repeat>
+    </scroll-view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy';
+  import test from './errTest';
+
+  export default class extends wepy.page {
+    constructor() {
+      super();
+    }
+
+    config = {
+      navigationBarTitleText: '错误信息测试',
+      enablePullDownRefresh: true
+    };
+    components = {
+      "test": test
+    };
+    computed = {
+      is_arr() {
+        return Array.isArray(this.testList)
+      }
+    };
+    data = {
+      testList: [],
+      isShow: true,
+      showNetErrorMsg: false,
+      netWork:true
+    };
+
+    refresh() {
+      this.testList = new Array(1).fill('hello world').concat(this.testList);
+    }
+
+    onPullDownRefresh() {
+      wx.stopPullDownRefresh();
+      this.isShow = false;
+      setTimeout(() => {
+        this.isShow = true;
+        if (this.netWork===false) {
+          this.loadData();
+          console.log(1);
+          this.netWork = true
+        }else{
+          // this.init();
+          this.refresh();
+        }
+        this.$apply()
+      }, 3000)
+    };
+
+    init() {
+      this.testList = new Array(10).fill('it is test error page');
+      this.$apply();
+      console.log('init is invoked');
+    };
+
+    loadData() {
+      wx.onNetworkStatusChange(res => {
+        console.log(res.isConnected, res.networkType);
+        if (res.isConnected === false) {
+          this.showNetErrorMsg = true;
+          this.netWork = res.isConnected;
+          wx.showToast({
+            icon: 'loading',
+            duration: 3000
+          });
+          setTimeout(() => {
+            this.testList = [];
+            this.$apply();
+          }, 3000);
+        } else {
+          this.init();
+        }
+      });
+    };
+
+    onShow() {
+      console.log('onLoad-->index', this);
+      // console.log(Array.isArray(this.testList),typeof(this.testList));
+      this.loadData()
+    };
+
+    // onPageNotFound(res) {
+    //   wx.redirectTo({
+    //     url: './home'
+    //   })
+    // }
+  }
+</script>
+
+<style lang="less" scoped>
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    color: transparent;
+  }
+
+  .scroll {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    width: 100%;
+    flex: 1;
+  }
+
+  .error_box {
+    width: 100%;
+    line-height: ~"150rpx";
+    text-align: center;
+    margin-bottom: ~"30rpx";
+    background-color: #fff;
+    font-size: ~"26rpx";
+  }
+
+  .loading {
+    width: ~"750rpx";
+  }
+
+  .loading, .error_text {
+    line-height: ~"80rpx";
+    text-align: center;
+    color: #f8485f;
+  }
+
+  .error_text {
+    border: 1px solid #000;
+    font-size: ~"26rpx";
+  }
+</style>
